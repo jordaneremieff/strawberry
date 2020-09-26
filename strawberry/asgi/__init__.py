@@ -54,6 +54,11 @@ class GraphQL:
     async def get_context(self, request: Request) -> typing.Optional[typing.Any]:
         return {"request": request}
 
+    async def get_websocket_context(
+        self, websocket: WebSocket
+    ) -> typing.Optional[typing.Any]:
+        return {"websocket": websocket}
+
     async def handle_keep_alive(self, websocket):
         if websocket.application_state == WebSocketState.DISCONNECTED:
             return
@@ -96,7 +101,7 @@ class GraphQL:
         if self.debug:
             pretty_print_graphql_operation(operation_name, query, variables)
 
-        context = {"websocket": websocket}
+        context = await self.get_websocket_context(websocket)
 
         data = await self.schema.subscribe(
             query,
